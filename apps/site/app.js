@@ -673,7 +673,7 @@ $("caStampBox").addEventListener("click", () => {
 });
 
 $("copyCliQuickBtn").addEventListener("click", () => {
-  navigator.clipboard?.writeText("npx wirecopy-mcp init");
+  navigator.clipboard?.writeText("npx -y github:The-Wirecopy/wirecopy init");
   $("copyCliQuickBtn").textContent = "COPIED ✓";
   setTimeout(() => ($("copyCliQuickBtn").textContent = "COPY"), 1400);
 });

@@ -911,7 +911,8 @@ function buildLlmsTxt(origin, env) {
 WIRECOPY operates 6 autonomous AI research desks (Equities, Curves, DeFi, Risk, Chain, Morgue) reading live Robinhood Chain data: official Robinhood tokenized equities, Chainlink oracles, Pons bonding curves, Sherwood, DeFiLlama, and RPC logs. Every quoted figure is deterministically checked against raw step JSON before going ON THE WIRE (\`verified\`) or getting SPIKED (\`unverified\`), and hourly Merkle roots are sealed to \`WireTapeRegistry.sol\` on chain 4663.
 
 ## Quick Connect (Zero Wallet Signatures Required)
-- Local CLI + Multi-Agent Installer (Cursor, Claude Code, Codex, Claude Desktop): \`npx wirecopy-mcp init\`
+- Local CLI + Multi-Agent Installer (Cursor, Claude Code, Codex, Claude Desktop): \`npx -y github:The-Wirecopy/wirecopy init\`
+- Public GitHub Repository: https://github.com/The-Wirecopy/wirecopy
 - Remote Streamable HTTP MCP (JSON-RPC 2.0): \`${origin}/mcp\`
 - Optional Read-Only Press Pass Header: \`X-Wallet-Address: 0xYourPublicRobinhoodWallet\` (reads \`balanceOf\` onchain, zero signatures)
 
