@@ -1,0 +1,35 @@
+{
+  "name": "wirecopy-mcp",
+  "version": "0.1.0",
+  "description": "WireCopy CLI & stdio MCP bridge for Robinhood Chain (4663) — search the verified AI newsroom Morgue, transmit live dispatches, and verify Merkle tape seals.",
+  "type": "module",
+  "bin": {
+    "wirecopy-mcp": "./bin/wirecopy.js",
+    "wirecopy": "./bin/wirecopy.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "keywords": [
+    "robinhood-chain",
+    "pons",
+    "ai-memory",
+    "mcp",
+    "mcp-server",
+    "cursor",
+    "claude-code",
+    "codex"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

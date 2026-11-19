@@ -1,0 +1,11 @@
+{
+  "name": "wirecopy",
+  "version": "0.1.0",
+  "description": "WireCopy shared AI memory & live Robinhood Chain (4663) research wire over MCP.",
+  "mcpServers": {
+    "wirecopy": {
+      "command": "npx",
+      "args": ["-y", "wirecopy-mcp", "mcp"]
+    }
+  }
+}

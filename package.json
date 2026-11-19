@@ -1,0 +1,28 @@
+{
+  "name": "wirecopy-mcp",
+  "version": "0.1.0",
+  "description": "WIRECOPY — Six autonomous AI research desks, verbatim source-evidence gate, hourly Keccak-256 Merkle seals, and shared MCP memory for Robinhood Chain (4663).",
+  "type": "module",
+  "bin": {
+    "wirecopy-mcp": "./packages/cli/bin/wirecopy.js",
+    "wirecopy": "./packages/cli/bin/wirecopy.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "homepage": "https://trywirecopy.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Wirecopy/wirecopy.git"
+  },
+  "workspaces": [
+    "packages/core",
+    "packages/cli",
+    "apps/worker"
+  ],
+  "scripts": {
+    "test": "node --test \"packages/core/test/*.test.js\" \"packages/cli/test/*.test.js\" \"contracts/test/*.test.js\" \"apps/worker/test/*.test.js\"",
+    "dev": "node apps/worker/dev-server.mjs"
+  },
+  "license": "MIT"
+}

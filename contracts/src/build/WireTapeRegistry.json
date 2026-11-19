@@ -1,0 +1,369 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "epochHour",
+          "type": "uint64"
+        }
+      ],
+      "name": "AlreadySealed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TokenAlreadyBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroValue",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousSealer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newSealer",
+          "type": "address"
+        }
+      ],
+      "name": "SealerUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "epochHour",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "merkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "dispatchCount",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "wiredFindingCount",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "sealedAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "TapeSealed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "WireTokenBound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "BUREAU_CHIEF_MIN",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PRESS_PASS_MIN",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "bindToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "epochHour",
+          "type": "uint64"
+        }
+      ],
+      "name": "getTapeSeal",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "merkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "sealedAt",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint32",
+          "name": "dispatchCount",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "wiredFindingCount",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestEpoch",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "epochHour",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "merkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "dispatchCount",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "wiredFindingCount",
+          "type": "uint32"
+        }
+      ],
+      "name": "sealTape",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "sealer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newSealer",
+          "type": "address"
+        }
+      ],
+      "name": "setSealer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "tierOf",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "tier",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalTapesSealed",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "epochHour",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "leafHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "proof",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "verifyFindingLeaf",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "valid",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "wireToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461007c5760018060a01b031933815f5416175f5533906001541617600155335f7f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08180a3335f7ff22549dd409130dc81be1d022d963887b72c83c603c9f0b92922cf782467f26c8180a36108d190816100818239f35b5f80fdfe60406080815260049081361015610014575f80fd5b5f3560e01c80630b27fc061461062257806329c710f1146105a35780632aea4d211461057b5780633ff5aa02146104d75780634bbede4a146104af5780634dcd9652146102c15780634ff761161461029c5780635fd1ec5d146102745780638da5cb5b1461024d5780639cb118bf14610222578063c300d6b2146101fe578063c8f74bb8146101c2578063f2fde38b1461014f5763fce10c57146100b6575f80fd5b3461014b57602036600319011261014b576001600160a01b0382358181169391929084900361014b57825f5416330361013f578315610132575050600154826bffffffffffffffffffffffff60a01b821617600155167ff22549dd409130dc81be1d022d963887b72c83c603c9f0b92922cf782467f26c5f80a3005b51637c946ed760e01b8152fd5b516282b42960e81b8152fd5b5f80fd5b503461014b57602036600319011261014b576001600160a01b038235818116939084900361014b575f549182169283330361013f5784156101325750506001600160a01b03191682175f9081557f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09080a3005b50903461014b57602036600319011261014b57356001600160a01b038116810361014b576101ef906107ae565b60ff8351921682526020820152f35b503461014b575f36600319011261014b576020905169d3c21bcecceda10000008152f35b503461014b575f36600319011261014b5760209067ffffffffffffffff60025460a01c169051908152f35b503461014b575f36600319011261014b575f5490516001600160a01b039091168152602090f35b503461014b575f36600319011261014b5760209067ffffffffffffffff600354169051908152f35b503461014b575f36600319011261014b57602090516a0422ca8b0a00a4250000008152f35b503461014b57608036600319011261014b576102db610693565b90602435926044359163ffffffff80841680940361014b5760643590811680910361014b57600154336001600160a01b03918216141590816104a1575b506104945767ffffffffffffffff808616958615801561048c575b8015610484575b61047457865f5284602052816001855f2001541661045d579181606095937f217cd36bfc99770e58d58acfaa915de9df3fee3d8b649e6b2c25fe6792ee734997959342169484519061038b826106aa565b8b82528a84600160208501948a8652898101948c86528d8201948a86525f52602052895f2090518155019351166bffffffff000000000000000084549351891b169163ffffffff8c1b90518c1b16926fffffffffffffffffffffffffffffffff1916171717905560035482600181831601169067ffffffffffffffff191617600355600254918260a01c16891161042f575b505081519384526020840152820152a3005b67ffffffffffffffff60a01b1990911660a09190911b67ffffffffffffffff60a01b16176002555f8061041d565b8351631704333160e21b8152808601889052602490fd5b50505051637c946ed760e01b8152fd5b50821561033a565b508715610333565b50516282b42960e81b8152fd5b90505f54163314155f610318565b503461014b575f36600319011261014b5760025490516001600160a01b039091168152602090f35b503461014b57602036600319011261014b576001600160a01b038235818116929083900361014b57815f5416330361056d57821561055e5760025491821661054f57506001600160a01b03191681176002557f1f100d9ef4c9aecbf28fd21168b04c261b93da347a876ec4846f3793602755445f80a2005b5163f8b5804160e01b81528390fd5b51637c946ed760e01b81528390fd5b516282b42960e81b81528390fd5b503461014b575f36600319011261014b5760015490516001600160a01b039091168152602090f35b503461014b57602036600319011261014b57606060809267ffffffffffffffff90816105cd610693565b165f52602052825f209280516105e2816106aa565b600185549586835201549283169081602082015263ffffffff8085851c16948585840152861c169485910152815194855260208501528301526060820152f35b503461014b57606036600319011261014b5761063c610693565b916044359067ffffffffffffffff9081831161014b573660238401121561014b5782013590811161014b573660248260051b8401011161014b57602093602461068a930190602435906106f6565b90519015158152f35b6004359067ffffffffffffffff8216820361014b57565b6080810190811067ffffffffffffffff8211176106c657604052565b634e487b7160e01b5f52604160045260245ffd5b6060810190811067ffffffffffffffff8211176106c657604052565b67ffffffffffffffff90939193165f52602060046020526040805f205494851580156107a6575b61079c57939291905f935b8385106107385750505050501490565b90919293946001908660051b830135808211155f14610779578451908682019283528582015284815261076a816106da565b519020955b0193929190610728565b9084519086820192835285820152848152610793816106da565b5190209561076f565b5050505050505f90565b50801561071d565b6001600160a01b0390811691908215801561088f575b6108875760209060025416926024604051809581936370a0823160e01b835260048301525afa91821561087c575f92610832575b50816a0422ca8b0a00a42500000081101561082b575069d3c21bcecceda1000000821015610825575f9190565b60019190565b6002925090565b90915060203d602011610875575b601f8101601f1916820167ffffffffffffffff8111838210176106c65760209183916040528101031261014b5751905f6107f8565b503d610840565b6040513d5f823e3d90fd5b505f91508190565b508060025416156107c456fea2646970667358221220d35303f09fff9490eb02c98174e75dd9e33bb2ef4a83f862a09da21bd1bb954664736f6c63430008180033"
+}

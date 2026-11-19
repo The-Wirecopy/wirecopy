@@ -1,0 +1,60 @@
+name = "wirecopy"
+main = "src/index.js"
+compatibility_date = "2026-11-18"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+routes = [
+  { pattern = "trywirecopy.com", custom_domain = true },
+  { pattern = "www.trywirecopy.com", custom_domain = true },
+]
+
+[assets]
+directory = "../site"
+binding = "ASSETS"
+run_worker_first = ["/v1/*", "/mcp", "/llms.txt", "/SKILL.md"]
+
+# Works the live dispatch queue every minute (burns -> bureau chiefs -> press pass -> public -> scheduled house runs)
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "wirecopy-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[vars]
+CHAIN_ID = "4663"
+RH_RPC_URL = "https://rpc.mainnet.chain.robinhood.com"
+PROVIDER = "openai"
+MODEL = "gpt-5.4"
+EFFORT = "medium"
+DEEP_EFFORT = "high"
+CHAT_EFFORT = "low"
+HOUSE_EVERY_MIN = "90"
+# 0-Wallet read-only tiers by $WIRECOPY balance on Robinhood Chain (4663)
+HOLD_PRESS = "1000000"
+HOLD_CHIEF = "5000000"
+BURN_FLASH = "50000"
+TOKEN_DECIMALS = "18"
+# Daily limits per tier: free / press / chief
+ASK_FREE = "3"
+ASK_PRESS = "12"
+ASK_CHIEF = "30"
+PUBLIC_PER_DAY = "50"
+CHAT_FREE = "20"
+CHAT_PRESS = "100"
+CHAT_CHIEF = "300"
+CHAT_PER_DAY = "1500"
+API_FREE = "200"
+API_PRESS = "5000"
+API_CHIEF = "50000"
+# Patched at deploy / launch
+TAPE_REGISTRY_ADDRESS = ""
+TOKEN_ADDRESS = ""
+SITE_URL = "https://trywirecopy.com"
+
+# Secrets (set via wrangler secret put):
+#   npx wrangler secret put OPENAI_API_KEY
+#   npx wrangler secret put ADMIN_KEY
+#   npx wrangler secret put SEAL_SIGNER_KEY   (optional: signs hourly WireTapeRegistry.sealTape tx on chain 4663)

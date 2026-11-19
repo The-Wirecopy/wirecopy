@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WIRECOPY — Live AI Memory Wire for Robinhood Chain</title>
+  <meta name="description" content="Six AI research desks cover Robinhood Chain stock tokens, Chainlink feeds, Pons curves, DeFi TVL, and wallets on live data. Every number is checked verbatim against its source before going ON THE WIRE." />
+  <meta property="og:title" content="WIRECOPY — If the tape doesn't match, spike the copy." />
+  <meta property="og:description" content="Autonomous AI research desks & source-verified shared MCP memory for Robinhood Chain (4663)." />
+  <meta property="og:image" content="https://trywirecopy.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://trywirecopy.com/og-image.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,600;0,6..72,700;0,6..72,800;1,6..72,600&family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/site.css" />
+</head>
+<body>
+  <!-- CONTINUOUS PERFORATED YELLOW TICKER TAPE RIBBON -->
+  <div class="punch-ribbon" role="region" aria-label="Live Wire Ticker">
+    <div class="punch-holes" aria-hidden="true"></div>
+    <div class="ticker-viewport">
+      <div class="ticker-track" id="tickerTrack">
+        <span>● ROBINHOOD CHAIN (4663) BUREAU ONLINE</span>
+        <span>● SIX AI DESKS CHECK EVERY NUMBER AGAINST RAW SOURCE JSON</span>
+        <span>● IF THE TAPE DOESN'T MATCH, SPIKE THE COPY</span>
+        <span>● ZERO WALLET SIGNATURES REQUIRED</span>
+      </div>
+    </div>
+    <div class="punch-holes" aria-hidden="true"></div>
+  </div>
+
+  <div class="chassis">
+    <!-- NEWSPAPER / BUREAU MASTHEAD WITH LEFT & RIGHT EARS -->
+    <header class="masthead">
+      <div class="ear ear-left">
+        <div class="ear-kicker">
+          <span class="lamp lamp-green" id="aiEngineLamp"></span>
+          <span id="aiEngineLabel">BUREAU ONLINE · CHAIN 4663</span>
+        </div>
+        <div class="ear-metrics">
+          <div><b id="statDispatches">0</b><span>DISPATCHES</span></div>
+          <div><b id="statWired">0</b><span>ON WIRE</span></div>
+          <div><b id="statMatchRate">100%</b><span>MATCHED</span></div>
+          <div><b id="statSeals">0</b><span>SEALS</span></div>
+        </div>
+      </div>
+
+      <div class="nameplate">
+        <a href="#wire" class="nameplate-lockup" data-nav="wire">
+          <img src="/logo.png" alt="WireCopy Teletype Emblem" class="nameplate-emblem" width="66" height="66" />
+          <div class="nameplate-titles">
+            <div class="nameplate-vol">VOL. I · ROBINHOOD CHAIN AUTONOMOUS RESEARCH BUREAU</div>
+            <div class="nameplate-word">THE WIRECOPY</div>
+            <div class="nameplate-motto">“If the tape doesn’t match, spike the copy.”</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="ear ear-right">
+        <div class="ca-stamp" id="caStampBox" title="Click to copy $WIRECOPY contract address">
+          <span class="ca-label">PRESS TOKEN</span>
+          <code id="caDisplay">CA: ANNOUNCING ON X</code>
+        </div>
+        <div class="press-slot">
+          <button type="button" class="press-btn" id="openPressModalBtn">
+            <span class="press-dot"></span>
+            <span>0-WALLET PASS: <strong id="callerTierBadge">PUBLIC READER</strong></span>
+          </button>
+          <a href="https://github.com/The-Wirecopy/wirecopy" target="_blank" rel="noopener" class="x-wire-link" title="Open-source GitHub repository">GITHUB ↗</a>
+          <a href="https://x.com/wirecopyapp" target="_blank" rel="noopener" class="x-wire-link" id="xProfileLink">X WIRE ↗</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- MECHANICAL TELETYPE SWITCHBOARD KEYBANK -->
+    <nav class="keybank" aria-label="Bureau Sections">
+      <button type="button" class="keycap active" data-nav="wire">
+        <span class="key-code">SEC A</span>
+        <span class="key-name">Front Page &amp; Live Teletype</span>
+      </button>
+      <button type="button" class="keycap" data-nav="morgue">
+        <span class="key-code">SEC B</span>
+        <span class="key-name">The Morgue <em id="navMorgueCount">0</em></span>
+      </button>
+      <button type="button" class="keycap" data-nav="graph">
+        <span class="key-code">SEC C</span>
+        <span class="key-name">Entity Wire Graph</span>
+      </button>
+      <button type="button" class="keycap" data-nav="chief">
+        <span class="key-code">SEC D</span>
+        <span class="key-name">Ask Copy Chief (AI)</span>
+      </button>
+      <button type="button" class="keycap" data-nav="seals">
+        <span class="key-code">SEC E</span>
+        <span class="key-name">Merkle Seals &amp; MCP</span>
+      </button>
+    </nav>
+
+    <!-- ==================== SECTION A: FRONT PAGE & LIVE TELETYPE ==================== -->
+    <section class="section-view active" id="view-wire">
+      <!-- MECHANICAL ASSIGNMENT PLATEN (0-WALLET INSTANT DISPATCH) -->
+      <div class="platen-deck">
+        <div class="platen-top">
+          <div class="platen-heading">
+            <span class="platen-tag">LIVE ASSIGNMENT TELETYPE</span>
+            <span class="platen-sub">Paste any Pons <code>0x</code> CA, wallet, stock ticker (<code>TSLA</code>, <code>NVDA</code>), or question — an AI desk researches live chain data &amp; checks every quote verbatim.</span>
+          </div>
+          <div class="quota-readout" id="quotaReadout">FREE QUOTA: 3 / DAY · 0-WALLET</div>
+        </div>
+
+        <form class="platen-form" id="dispatchForm">
+          <div class="desk-keys" role="radiogroup" aria-label="Select Editorial Desk">
+            <button type="button" class="desk-key active" data-desk="">AUTO</button>
+            <button type="button" class="desk-key" data-desk="equities" title="Tokenized stocks vs Chainlink oracles">EQT · Equities</button>
+            <button type="button" class="desk-key" data-desk="curves" title="Pons bonding curves & holders">CRV · Curves</button>
+            <button type="button" class="desk-key" data-desk="defi" title="Robinhood Chain TVL & DEX volume">DFI · DeFi</button>
+            <button type="button" class="desk-key" data-desk="risk" title="Fake stock clones, whales & stables">RSK · Risk</button>
+            <button type="button" class="desk-key" data-desk="chain" title="Direct RPC wallet & contract check">RPC · Chain</button>
+            <button type="button" class="desk-key" data-desk="morgue" title="Compare against earlier saved findings">MRG · Morgue</button>
+          </div>
+
+          <div class="platen-input-row">
+            <input
+              type="text"
+              id="dispatchInput"
+              class="platen-input"
+              placeholder="e.g. How far is TSLA from its Chainlink oracle? · Are there fake NVDA tokens on Pons? · 0xcd5c…a8f7"
+              maxlength="280"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="button" class="flash-toggle-btn" id="toggleBurnInputBtn" title="Jump to #1 in queue with a 50K $WIRECOPY burn tx">⚡ FLASH BURN</button>
+            <button type="submit" class="transmit-btn" id="transmitBtn">TRANSMIT WIRE ↵</button>
+          </div>
+
+          <div class="burn-drawer" id="burnDrawer" hidden>
+            <label for="burnTxInput">FLASH BULLETIN PRIORITY (burn <code>50,000 $WIRECOPY</code> to <code>0x000000000000000000000000000000000000dEaD</code>, paste tx hash):</label>
+            <input type="text" id="burnTxInput" placeholder="0x… Robinhood Chain burn transaction hash" spellcheck="false" />
+          </div>
+
+          <div class="punch-presets">
+            <span class="preset-lbl">PUNCH CARDS:</span>
+            <button type="button" class="punch-chip" data-desk="equities" data-q="How close do the TSLA and NVDA tokens trade to their Chainlink oracles right now?">TSLA &amp; NVDA Oracle Gap</button>
+            <button type="button" class="punch-chip" data-desk="risk" data-q="Are there unofficial Pons tokens copying tickers like TSLA or NVDA, and how big are they?">Fake Stock Clones on Pons</button>
+            <button type="button" class="punch-chip" data-desk="curves" data-q="Which Pons launches are trending right now by market cap, volume, and curve progress?">Trending Pons Curves</button>
+            <button type="button" class="punch-chip" data-desk="defi" data-q="Which Robinhood Chain protocols lead by DeFi TVL and 24h DEX volume today?">Chain TVL &amp; DEX Leaders</button>
+            <button type="button" class="punch-chip" data-desk="chain" data-q="0xcd5c01ea857df6253323a1bde87cd1d3a442a8f7">Inspect 0xcd5c…a8f7</button>
+          </div>
+          <div class="form-feedback" id="dispatchFeedback" role="status"></div>
+        </form>
+      </div>
+
+      <!-- ASYMMETRIC 3-COLUMN NEWSPAPER FRONT PAGE -->
+      <div class="broadsheet-grid">
+        <!-- COLUMN 1: WIRE DISPATCH DECK -->
+        <aside class="wire-deck-col">
+          <div class="col-header">
+            <div>
+              <span class="col-kicker">INCOMING WIRE</span>
+              <h2>Dispatches</h2>
+            </div>
+            <div class="deck-filters">
+              <button type="button" class="mini-filter active" data-mfilter="all">ALL</button>
+              <button type="button" class="mini-filter" data-mfilter="public">READERS</button>
+              <button type="button" class="mini-filter" data-mfilter="house">BUREAU</button>
+            </div>
+          </div>
+          <div class="dispatch-list" id="dispatchList">
+            <div class="deck-loading">Connecting to Robinhood Chain wire…</div>
+          </div>
+        </aside>
+
+        <!-- COLUMN 2: PHYSICAL PERFORATED TRACTOR-FEED PAPER ROLL -->
+        <article class="tractor-carriage" aria-live="polite">
+          <div class="tear-edge tear-top" aria-hidden="true"></div>
+          <div class="tractor-paper">
+            <div class="sprocket-strip sprocket-left" aria-hidden="true"></div>
+            <div class="paper-body" id="paperBody">
+              <div class="paper-empty">
+                <div class="typewriter-cursor">SELECT A DISPATCH OR TRANSMIT AN ASSIGNMENT ABOVE</div>
+              </div>
+            </div>
+            <div class="sprocket-strip sprocket-right" aria-hidden="true"></div>
+          </div>
+          <div class="tear-edge tear-bottom" aria-hidden="true"></div>
+        </article>
+
+        <!-- COLUMN 3: VERIFIED CLIPPINGS + THE SPIKE + CLI BOX -->
+        <aside class="side-rail-col">
+          <div class="rail-box">
+            <div class="rail-box-head">
+              <span class="stamp-pill stamp-wired">ON THE WIRE</span>
+              <span class="rail-box-title">Latest Verified Facts</span>
+            </div>
+            <div class="clipping-stack" id="latestWiredStack">
+              <div class="rail-muted">Awaiting verified clippings…</div>
+            </div>
+          </div>
+
+          <div class="rail-box spike-box">
+            <div class="rail-box-head">
+              <span class="stamp-pill stamp-spiked">SPIKED</span>
+              <span class="rail-box-title">Copy Chief’s Spike</span>
+            </div>
+            <p class="spike-explainer">Claims where the agent’s quoted figure failed verbatim raw-JSON verification stay impaled in public view:</p>
+            <div class="clipping-stack" id="latestSpikedStack">
+              <div class="rail-muted">0 hallucinations spiked so far — every quote matched raw source JSON.</div>
+            </div>
+          </div>
+
+          <div class="rail-box cli-classified">
+            <div class="rail-box-head">
+              <span class="classified-tag">AGENT HOOKUP · STDIO MCP</span>
+              <button type="button" class="tiny-copy-btn" id="copyCliQuickBtn">COPY</button>
+            </div>
+            <pre class="classified-code" id="quickCliCmd">npx wirecopy-mcp init</pre>
+            <p class="classified-foot">Wires Cursor, Claude Code, Codex &amp; Claude Desktop into the shared Robinhood Chain Morgue in 5 seconds.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION B: THE MORGUE (SHARED MEMORY) ==================== -->
+    <section class="section-view" id="view-morgue">
+      <div class="sec-masthead">
+        <div>
+          <span class="sec-folio">SECTION B · SHARED VERIFIED ARCHIVE</span>
+          <h2>The Newsroom Morgue</h2>
+          <p>Every fact filed by WireCopy’s 6 AI desks, stamped <strong>ON THE WIRE</strong> when its exact quote matched the raw source payload or <strong>SPIKED</strong> when it didn’t.</p>
+        </div>
+        <div class="morgue-controls">
+          <input type="search" id="morgueSearchInput" class="morgue-search" placeholder="Search ticker, protocol, 0x prefix, or figure…" />
+          <select id="morgueDeskSelect" class="morgue-select">
+            <option value="">All 6 Desks</option>
+            <option value="equities">EQT · Equities</option>
+            <option value="curves">CRV · Curves</option>
+            <option value="defi">DFI · DeFi</option>
+            <option value="risk">RSK · Risk</option>
+            <option value="chain">RPC · Chain</option>
+            <option value="morgue">MRG · Morgue</option>
+          </select>
+          <select id="morgueStatusSelect" class="morgue-select">
+            <option value="">All Stamps</option>
+            <option value="verified">ON THE WIRE (Verified)</option>
+            <option value="unverified">SPIKED (Rejected)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="morgue-grid" id="morgueGrid"></div>
+    </section>
+
+    <!-- ==================== SECTION C: ENTITY WIRE GRAPH ==================== -->
+    <section class="section-view" id="view-graph">
+      <div class="sec-masthead">
+        <div>
+          <span class="sec-folio">SECTION C · CROSS-DISPATCH TOPOLOGY</span>
+          <h2>Entity Co-Occurrence Wire Graph</h2>
+          <p>Click any stock ticker, protocol, or contract node to pull every verified Morgue clipping linking it across Robinhood Chain.</p>
+        </div>
+      </div>
+
+      <div class="graph-stage">
+        <div class="graph-canvas-wrap">
+          <svg id="entityGraphSvg" viewBox="0 0 900 540" role="img" aria-label="Entity co-occurrence graph"></svg>
+        </div>
+        <div class="graph-inspector">
+          <div class="rail-box-head">
+            <span class="stamp-pill stamp-wired">NODE DOSSIER</span>
+            <strong id="graphSelectedNode">Select a node</strong>
+          </div>
+          <div id="graphNodeFindings" class="clipping-stack">
+            <div class="rail-muted">Click any node on the wire map to read its verified clippings.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION D: COPY CHIEF DESK (AI CHAT) ==================== -->
+    <section class="section-view" id="view-chief">
+      <div class="chief-layout">
+        <div class="chief-terminal">
+          <div class="chief-header">
+            <div>
+              <span class="sec-folio">SECTION D · DIRECT INTERROGATION LINE</span>
+              <h2>The Copy Chief’s Desk</h2>
+            </div>
+            <button type="button" class="tiny-copy-btn" id="clearChatBtn">NEW ROLL</button>
+          </div>
+
+          <div class="chief-Roll" id="chiefMessages">
+            <div class="chief-msg chief-bot">
+              <div class="chief-role">COPY CHIEF</div>
+              <div class="chief-bubble">Desk is open. Ask about any Robinhood Chain stock token, Chainlink oracle gap, Pons curve, DeFi protocol, or wallet — I check the Morgue and live chain feeds before answering.
+--30--</div>
+            </div>
+          </div>
+
+          <form class="chief-form" id="chiefForm">
+            <input
+              type="text"
+              id="chiefInput"
+              placeholder="Ask the Copy Chief (e.g. What do we know about TSLA oracle drift or top Pons curves?)…"
+              maxlength="600"
+              autocomplete="off"
+            />
+            <button type="submit" class="transmit-btn" id="chiefSendBtn">SEND TO DESK ↵</button>
+          </form>
+        </div>
+
+        <aside class="chief-sidebar">
+          <div class="rail-box">
+            <div class="rail-box-head">
+              <span class="classified-tag">DIRECT QUESTIONS</span>
+            </div>
+            <div class="chief-prompts">
+              <button type="button" class="chief-try" data-q="What does the official TSLA Chainlink feed read vs its Robinhood token right now?">“What does the official TSLA Chainlink feed read vs its token right now?”</button>
+              <button type="button" class="chief-try" data-q="Which DeFi protocols hold the most TVL on Robinhood Chain today?">“Which DeFi protocols hold the most TVL on Robinhood Chain today?”</button>
+              <button type="button" class="chief-try" data-q="Which Pons bonding curves are leading volume right now?">“Which Pons bonding curves are leading volume right now?”</button>
+              <button type="button" class="chief-try" data-q="Are there unofficial Pons tokens impersonating NVDA or TSLA?">“Are there unofficial Pons tokens impersonating NVDA or TSLA?”</button>
+            </div>
+          </div>
+          <div class="rail-box">
+            <div class="rail-box-head"><span class="classified-tag">EDITORIAL RULES</span></div>
+            <p class="classified-foot">The Copy Chief never gives buy/sell advice, never touches private keys, and lists every live tool called beneath each answer.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ==================== SECTION E: MERKLE SEALS, MCP & $WIRECOPY ==================== -->
+    <section class="section-view" id="view-seals">
+      <div class="sec-masthead">
+        <div>
+          <span class="sec-folio">SECTION E · ONCHAIN PROOF &amp; AGENT PROTOCOL</span>
+          <h2>Hourly Merkle Tape Seals &amp; Press Credentials</h2>
+          <p><code>WireTapeRegistry.sol</code> anchors sorted-pair Keccak-256 Merkle roots of verified <strong>ON THE WIRE</strong> findings to Robinhood Chain (<code>4663</code>). Test any leaf below — tamper a single digit to watch verification fail.</p>
+        </div>
+      </div>
+
+      <div class="seals-two-col">
+        <div class="rail-box">
+          <div class="rail-box-head">
+            <span class="stamp-pill stamp-wired">KECCAK-256 PROOF VERIFIER</span>
+            <code id="sealRegistryAddrDisplay">WireTapeRegistry (4663)</code>
+          </div>
+          <div id="sealsListWrap" class="seals-list"></div>
+          <div id="proofPlayground" class="proof-playground" hidden>
+            <div class="proof-row"><span>Epoch Hour:</span> <code id="pfEpoch">—</code></div>
+            <div class="proof-row"><span>Merkle Root:</span> <code id="pfRoot">—</code></div>
+            <label class="proof-lbl" for="pfClaimEdit">Claim Payload (edit any character to test tamper detection):</label>
+            <textarea id="pfClaimEdit" rows="2" class="proof-textarea"></textarea>
+            <div class="proof-actions">
+              <button type="button" class="transmit-btn" id="verifyLeafBtn">VERIFY MERKLE PROOF</button>
+              <button type="button" class="flash-toggle-btn" id="tamperLeafBtn">TAMPER 1 DIGIT</button>
+              <button type="button" class="mini-filter" id="restoreLeafBtn">RESTORE</button>
+            </div>
+            <div class="proof-result" id="proofResultBox"></div>
+          </div>
+        </div>
+
+        <div class="rail-box">
+          <div class="rail-box-head">
+            <span class="classified-tag">0-WALLET PRESS TIERS ($WIRECOPY)</span>
+          </div>
+          <table class="tiers-table">
+            <thead>
+              <tr>
+                <th>Credential</th>
+                <th>Hold (Read-Only)</th>
+                <th>Dispatches</th>
+                <th>Chief Chat</th>
+                <th>MCP Calls</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Public Reader</strong></td>
+                <td>0</td>
+                <td>3 / day</td>
+                <td>20 / day</td>
+                <td>200 / day</td>
+              </tr>
+              <tr>
+                <td><strong>Press Pass</strong></td>
+                <td>&ge; 1,000,000</td>
+                <td>12 / day (Priority)</td>
+                <td>100 / day</td>
+                <td>5,000 / day</td>
+              </tr>
+              <tr>
+                <td><strong>Bureau Chief</strong></td>
+                <td>&ge; 5,000,000</td>
+                <td>30 / day (20-Turn Deep)</td>
+                <td>300 / day</td>
+                <td>50,000 / day</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="classified-foot" style="margin-top:10px;">
+            <strong>⚡ Flash Bulletin Burn:</strong> Send <code>50,000 $WIRECOPY</code> to <code>0x…dEaD</code> and paste the tx hash to jump to #1 ahead of every tier. Creator fees: 50% fund AI desk inference, 50% buy back &amp; burn.
+          </p>
+
+          <hr class="box-rule" />
+
+          <div class="rail-box-head">
+            <span class="classified-tag">GENERATE 0-WALLET MCP KEY (FOR CURSOR / CLAUDE / BOTS)</span>
+          </div>
+          <form class="mcp-key-form" id="mcpKeyForm">
+            <input type="text" id="mcpWalletInput" placeholder="Public 0x Robinhood Chain wallet (zero signature)" required />
+            <input type="text" id="mcpNameInput" placeholder="Label (e.g. cursor)" value="cursor-agent" required />
+            <button type="submit" class="transmit-btn">ISSUE KEY</button>
+          </form>
+          <div id="mcpKeyOutput" class="mcp-key-out" hidden></div>
+
+          <pre class="classified-code" style="margin-top:12px;" id="mcpConfigSnippet"># One-command local setup (Cursor, Claude Code, Codex, Claude Desktop):
+npx wirecopy-mcp init
+
+# Or point any Streamable HTTP MCP client to:
+POST /mcp  (Authorization: Bearer wcp_...)</pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 0-WALLET READ-ONLY PRESS PASS MODAL (NO METAMASK POPUP!) -->
+  <div class="modal-backdrop" id="pressModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pressModalTitle">
+      <div class="rail-box-head">
+        <span class="stamp-pill stamp-wired">ZERO-SIGNATURE CHECK</span>
+        <button type="button" class="mini-filter" id="closePressModalBtn">✕ CLOSE</button>
+      </div>
+      <h3 id="pressModalTitle">0-Wallet Press Pass Lookup</h3>
+      <p class="classified-foot">Never connect MetaMask to a young token site. Paste any public <code>0x</code> Robinhood Chain address — WireCopy reads <code>balanceOf</code> directly via RPC with zero signatures or approvals.</p>
+      <form id="pressWalletForm" class="mcp-key-form" style="margin-top:12px;">
+        <input type="text" id="pressWalletInput" placeholder="0x… public Robinhood Chain address" spellcheck="false" />
+        <button type="submit" class="transmit-btn">CHECK TIER</button>
+        <button type="button" class="mini-filter" id="clearPressWalletBtn">CLEAR</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "chainId": 4663,
+  "network": "Robinhood Chain",
+  "contracts": {
+    "WireTapeRegistry": {
+      "address": null,
+      "sourcify": "pending-deploy",
+      "compiler": "0.8.24+commit.e11b9ed9",
+      "evmVersion": "cancun",
+      "optimizerRuns": 200,
+      "viaIR": true
+    }
+  },
+  "token": {
+    "symbol": null,
+    "address": null
+  }
+}

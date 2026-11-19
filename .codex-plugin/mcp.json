@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "wirecopy": {
+      "command": "npx",
+      "args": ["-y", "wirecopy-mcp", "mcp"]
+    }
+  }
+}
