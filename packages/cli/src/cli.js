@@ -44,6 +44,18 @@ export async function runCli(argv, { fetchImpl = fetch, stdout = process.stdout,
     return;
   }
 
+  if (cmd === "xray" || cmd === "scan") {
+    const q = flags._.slice(1).join(" ").trim();
+    if (!q) throw new Error('Usage: wirecopy-mcp xray <0x_or_ticker>');
+    const xr = await fetchImpl(`${apiUrl}/v1/xray?q=${encodeURIComponent(q)}`).then((x) => x.json());
+    if (xr.error) throw new Error(xr.error);
+    stdout.write(`[${xr.badge}] ${xr.title} (${xr.address || xr.query}) — ${xr.elapsed_ms}ms\n`);
+    for (const m of xr.metrics || []) stdout.write(`  ${m.label.padEnd(18)} : ${m.value}\n`);
+    for (const f of xr.flags || []) stdout.write(`  [${f.severity.toUpperCase()}] ${f.text}\n`);
+    stdout.write("--30--\n");
+    return;
+  }
+
   if (cmd === "dispatch" || cmd === "ask") {
     const question = flags._.slice(1).join(" ").trim();
     if (!question) throw new Error('Usage: wirecopy-mcp dispatch "TSLA"');

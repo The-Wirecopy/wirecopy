@@ -25,6 +25,9 @@ import {
   buildMerkleTree,
   verifyMerkleProof,
   hashFindingLeaf,
+  getLiveTrenchRadar,
+  runInstantXray,
+  WireToolError,
 } from "../../../packages/core/src/index.js";
 import { executeMission, normalizeChatHistory, runCopyChiefChat } from "./llm-loop.js";
 import { hasModelKey } from "./providers.js";
@@ -756,6 +759,19 @@ async function issueReadOnlyKey(env, body) {
 // ---------- Streamable HTTP MCP Server (`/mcp`) ----------
 export const MCP_TOOLS = [
   {
+    name: "instant_xray",
+    title: "Instant <1s Robinhood Chain Token / Stock / Wallet X-Ray",
+    description:
+      "Sub-second deterministic check for fake stock ticker clones (TSLA, NVDA, HOOD, SPY, etc.), Pons bonding-curve tax bps, non-pool top-10 whale concentration %, deployer holdings %, and live Chainlink oracle spread.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: '0x token/wallet address, URL, or ticker, e.g. "TSLA" or "0xaa55..."' },
+      },
+      required: ["query"],
+    },
+  },
+  {
     name: "search_morgue",
     title: "Search WireCopy Morgue",
     description:
@@ -855,6 +871,15 @@ async function handleMcp(req, env, ctxExec) {
       }
       await bumpUsage(env, who, "api");
 
+      if (name === "instant_xray") {
+        const xr = await runInstantXray(buildToolContext(env), a.query || "");
+        const summary = [
+          `[${xr.badge}] ${xr.title} (${xr.address}) — ${xr.elapsed_ms}ms`,
+          ...(xr.metrics || []).map((m) => `• ${m.label}: ${m.value}`),
+          ...(xr.flags || []).map((f) => `[${f.severity.toUpperCase()}] ${f.text}`),
+        ].join("\n");
+        return textOut(summary, xr);
+      }
       if (name === "search_morgue") {
         const r = await queryMorgue(env, {
           q: a.query || "",
@@ -962,6 +987,8 @@ export default {
             name: "WIRECOPY API",
             version: VERSION,
             endpoints: [
+              "/v1/xray?q=<0x_or_ticker>",
+              "/v1/radar",
               "/v1/stats",
               "/v1/desks",
               "/v1/missions",
@@ -974,6 +1001,18 @@ export default {
               "/mcp",
             ],
           });
+        }
+        if (p === "/v1/radar") {
+          return json(await getLiveTrenchRadar(buildToolContext(env)), 200, { "cache-control": "public, max-age=45" });
+        }
+        if (p === "/v1/xray") {
+          const q = url.searchParams.get("q") || url.searchParams.get("address") || url.searchParams.get("query") || "";
+          try {
+            return json(await runInstantXray(buildToolContext(env), q));
+          } catch (err) {
+            if (err instanceof WireToolError) throw fail(400, err.message);
+            throw err;
+          }
         }
         if (p === "/v1/desks" || p === "/v1/agents") {
           return json({ desks: Object.values(DESKS) }, 200, { "cache-control": "public, max-age=300" });

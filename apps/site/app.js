@@ -94,7 +94,7 @@ async function refreshStats() {
     if (s.caller) {
       $("callerTierBadge").textContent = (s.caller.label || "Public Reader").toUpperCase();
       const left = Math.max(0, (s.caller.limits?.ask || 3) - (s.caller.used?.ask || 0));
-      $("quotaReadout").textContent = `${(s.caller.label || "Public").toUpperCase()} · ${left}/${s.caller.limits?.ask || 3} DISPATCHES LEFT TODAY`;
+      $("quotaReadout").textContent = `X-RAY: UNLIMITED · AI WIRE: ${left}/${s.caller.limits?.ask || 3} LEFT`;
     }
   } catch (e) {
     console.warn("stats refresh failed:", e);
@@ -354,7 +354,7 @@ function renderTractorPaper(m, steps) {
   `;
 }
 
-// ==================== DISPATCH FORM ====================
+// ==================== INSTANT <1S X-RAY + DISPATCH FORM ====================
 document.querySelectorAll(".desk-key").forEach((b) => {
   b.addEventListener("click", () => {
     state.selectedDesk = b.dataset.desk;
@@ -362,28 +362,189 @@ document.querySelectorAll(".desk-key").forEach((b) => {
   });
 });
 
-document.querySelectorAll(".punch-chip").forEach((chip) => {
-  chip.addEventListener("click", () => {
-    $("dispatchInput").value = chip.dataset.q;
-    state.selectedDesk = chip.dataset.desk || "";
-    document.querySelectorAll(".desk-key").forEach((x) => x.classList.toggle("active", x.dataset.desk === state.selectedDesk));
-    $("dispatchInput").focus();
+function isNaturalQuestion(q) {
+  const s = q.trim();
+  if (/0x[0-9a-fA-F]{40}/.test(s)) return false;
+  if (s.includes("?") || s.split(/\s+/).length >= 4) return true;
+  return false;
+}
+
+async function runXrayUI(rawQuery, { silent = false } = {}) {
+  const q = String(rawQuery || "").trim();
+  if (!q) return;
+  const card = $("xrayResultCard");
+  if (!silent) {
+    card.hidden = false;
+    card.className = "xray-card";
+    card.innerHTML = `<div class="xray-latency">⚡ Scanning Robinhood Chain RPC + Pons + ISIN registry for <code>${esc(q)}</code>…</div>`;
+  }
+  try {
+    const xr = await api(`/v1/xray?q=${encodeURIComponent(q)}`);
+    renderXrayCard(xr);
+  } catch (err) {
+    if (!silent) {
+      card.hidden = false;
+      card.className = "xray-card level-warn";
+      card.innerHTML = `<div class="xray-head">
+        <span class="xray-badge level-warn">NOT IN TOKEN INDEX</span>
+        <span class="xray-latency">${esc(err.message)}</span>
+        <button type="button" class="xray-act-btn primary" id="fallbackDeepBtn">ASK GPT-5.4 DESK INSTEAD ↵</button>
+      </div>`;
+      $("fallbackDeepBtn")?.addEventListener("click", () => submitDeepWire(q));
+    }
+  }
+}
+
+function renderXrayCard(xr) {
+  const card = $("xrayResultCard");
+  card.hidden = false;
+  card.className = `xray-card level-${esc(xr.level || "info")}`;
+
+  const metricsHtml = (xr.metrics || [])
+    .map(
+      (m) => `<div class="xray-metric tone-${esc(m.tone || "neutral")}">
+        <span>${esc(m.label)}</span>
+        <b>${esc(m.value)}</b>
+      </div>`
+    )
+    .join("");
+
+  const flagsHtml = (xr.flags || [])
+    .map((f) => `<div class="xray-flag sev-${esc(f.severity || "info")}">${esc(f.text)}</div>`)
+    .join("");
+
+  let extraHtml = "";
+  if (xr.official_stock_collision) {
+    const real = xr.official_stock_collision;
+    extraHtml += `<div class="xray-clones">
+      <span>REAL OFFICIAL ${esc(real.symbol)} ISIN CONTRACT:</span>
+      <button type="button" class="radar-chip" data-xray-jump="${esc(real.address)}">${esc(real.address.slice(0, 10))}… (${esc(real.isin || "ISIN")}) →</button>
+    </div>`;
+  }
+  if (xr.clones && xr.clones.length > 0) {
+    extraHtml += `<div class="xray-clones">
+      <span>INSPECT UNOFFICIAL PONS CLONES:</span>
+      ${xr.clones
+        .map(
+          (c) =>
+            `<button type="button" class="radar-chip is-danger" data-xray-jump="${esc(c.address)}">${esc(c.symbol)} ${esc(c.address.slice(0, 8))}… ($${(c.volume_usd || 0).toLocaleString()} vol)</button>`
+        )
+        .join("")}
+    </div>`;
+  }
+
+  const deepPrompt =
+    xr.kind === "stock_ticker"
+      ? `Compare official ${xr.query} stock token vs Chainlink oracle and audit any unofficial Pons ${xr.query} clones.`
+      : xr.address
+        ? xr.address
+        : xr.query;
+
+  card.innerHTML = `
+    <div class="xray-head">
+      <div class="xray-title-wrap">
+        <span class="xray-badge level-${esc(xr.level || "info")}">${esc(xr.badge)}</span>
+        <span class="xray-title">${esc(xr.title)}</span>
+        <span class="xray-latency">● ${xr.elapsed_ms}ms live RPC</span>
+      </div>
+      <div class="xray-actions">
+        ${xr.address ? `<button type="button" class="xray-act-btn" id="xrayCopyCaBtn" data-ca="${esc(xr.address)}">COPY ${esc(xr.address.slice(0, 6))}…${esc(xr.address.slice(-4))}</button>` : ""}
+        ${xr.pons_url ? `<a class="xray-act-btn" href="${esc(xr.pons_url)}" target="_blank" rel="noopener">PONS ↗</a>` : ""}
+        ${xr.explorer ? `<a class="xray-act-btn" href="${esc(xr.explorer)}" target="_blank" rel="noopener">BLOCKSCOUT ↗</a>` : ""}
+        <button type="button" class="xray-act-btn primary" id="xrayDeepAuditBtn" data-prompt="${esc(deepPrompt)}">⚡ DEEP GPT-5.4 DESK AUDIT ↵</button>
+      </div>
+    </div>
+    <div class="xray-metrics">${metricsHtml}</div>
+    <div class="xray-flags">${flagsHtml}</div>
+    ${extraHtml}
+  `;
+
+  $("xrayCopyCaBtn")?.addEventListener("click", (ev) => {
+    const ca = ev.currentTarget.dataset.ca;
+    navigator.clipboard?.writeText(ca);
+    ev.currentTarget.textContent = "COPIED ✓";
   });
-});
+  $("xrayDeepAuditBtn")?.addEventListener("click", (ev) => {
+    submitDeepWire(ev.currentTarget.dataset.prompt);
+  });
+  card.querySelectorAll("[data-xray-jump]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      $("dispatchInput").value = btn.dataset.xrayJump;
+      runXrayUI(btn.dataset.xrayJump);
+    });
+  });
+}
+
+function fmtCompactUsd(n) {
+  if (n == null || !Number.isFinite(n)) return "";
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+  return `$${Math.round(n)}`;
+}
+
+async function loadLiveRadar() {
+  try {
+    const r = await api("/v1/radar");
+    const bar = $("liveRadarBar");
+    if (!bar) return;
+    const liveChips = (r.items || []).slice(0, 5).map((item) => {
+      const mcap = fmtCompactUsd(item.market_cap_usd);
+      const pct = item.stage === "graduated" ? "GRAD" : item.curve_progress_pct != null ? `${item.curve_progress_pct}%` : "";
+      const cls = item.is_stock_clone ? "is-danger" : item.creator_tax_bps >= 300 ? "is-warn" : "";
+      return `<button type="button" class="radar-chip ${cls}" data-xray="${esc(item.address)}" title="${esc(item.name)} (${esc(item.address)})">$${esc(item.symbol)} ${mcap ? "· " + mcap : ""} ${pct ? "· " + pct : ""}${item.is_stock_clone ? " ⚠CLONE" : ""}</button>`;
+    });
+
+    bar.innerHTML = `
+      <span class="preset-lbl">● LIVE PONS TAPE (1-CLICK X-RAY):</span>
+      ${liveChips.join("")}
+      <button type="button" class="radar-chip is-warn" data-xray="TSLA">TSLA · Clone Audit</button>
+      <button type="button" class="radar-chip is-danger" data-xray="0xaa5565fa0b8dec9914533e8ae2435b85af6088cd">Fake TSLA (0xaa55…)</button>
+      <button type="button" class="radar-chip" data-xray="NVDA">NVDA · Oracle</button>
+    `;
+    bindRadarChips();
+
+    // Auto-show instant X-ray on first load so visitor gets live trader alpha in 0 clicks!
+    if (!$("xrayResultCard").innerHTML.trim()) {
+      const firstTarget = r.items?.[0]?.address || "TSLA";
+      runXrayUI(firstTarget, { silent: true });
+    }
+  } catch {
+    bindRadarChips();
+    runXrayUI("TSLA", { silent: true });
+  }
+}
+
+function bindRadarChips() {
+  document.querySelectorAll("[data-xray]").forEach((chip) => {
+    chip.onclick = () => {
+      $("dispatchInput").value = chip.dataset.xray;
+      runXrayUI(chip.dataset.xray);
+    };
+  });
+  document.querySelectorAll(".punch-chip").forEach((chip) => {
+    chip.onclick = () => {
+      $("dispatchInput").value = chip.dataset.q;
+      state.selectedDesk = chip.dataset.desk || "";
+      document.querySelectorAll(".desk-key").forEach((x) => x.classList.toggle("active", x.dataset.desk === state.selectedDesk));
+      submitDeepWire(chip.dataset.q);
+    };
+  });
+}
+bindRadarChips();
 
 $("toggleBurnInputBtn").addEventListener("click", () => {
   const d = $("burnDrawer");
   d.hidden = !d.hidden;
 });
 
-$("dispatchForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const q = $("dispatchInput").value.trim();
+async function submitDeepWire(overrideQuestion = "") {
+  const q = (overrideQuestion || $("dispatchInput").value).trim();
   if (!q) return;
   const burnTx = $("burnTxInput").value.trim();
-  const btn = $("transmitBtn");
+  const btn = $("deepWireBtn");
   btn.disabled = true;
-  $("dispatchFeedback").textContent = "Transmitting assignment to Robinhood Chain bureau…";
+  $("dispatchFeedback").textContent = "Dispatching gpt-5.4 AI reporter to live Robinhood Chain feeds…";
   try {
     const r = await api("/v1/missions", {
       method: "POST",
@@ -393,9 +554,8 @@ $("dispatchForm").addEventListener("submit", async (e) => {
         burn_tx: burnTx || undefined,
       },
     });
-    $("dispatchInput").value = "";
     $("burnTxInput").value = "";
-    $("dispatchFeedback").textContent = `Bulletin #${r.mission.id} assigned to ${r.mission.desk_name} — streaming live on roll below.`;
+    $("dispatchFeedback").textContent = `Bulletin #${r.mission.id} assigned to ${r.mission.desk_name} — streaming live on tractor roll below.`;
     await refreshMissions(false);
     await selectMission(r.mission.id);
     refreshStats();
@@ -403,6 +563,19 @@ $("dispatchForm").addEventListener("submit", async (e) => {
     $("dispatchFeedback").textContent = `Wire rejected: ${err.message}`;
   } finally {
     btn.disabled = false;
+  }
+}
+
+$("deepWireBtn").addEventListener("click", () => submitDeepWire());
+
+$("dispatchForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const q = $("dispatchInput").value.trim();
+  if (!q) return;
+  if (isNaturalQuestion(q)) {
+    await submitDeepWire(q);
+  } else {
+    await runXrayUI(q);
   }
 });
 
@@ -702,6 +875,7 @@ if (["wire", "morgue", "graph", "chief", "seals"].includes(initialHash)) {
   setView(initialHash);
 }
 refreshStats();
+loadLiveRadar();
 refreshMissions(true);
 refreshRightRailAndRibbon();
 setInterval(() => {

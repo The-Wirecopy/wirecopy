@@ -101,18 +101,34 @@
 
     <!-- ==================== SECTION A: FRONT PAGE & LIVE TELETYPE ==================== -->
     <section class="section-view active" id="view-wire">
-      <!-- MECHANICAL ASSIGNMENT PLATEN (0-WALLET INSTANT DISPATCH) -->
+      <!-- MECHANICAL ASSIGNMENT PLATEN (0-WALLET INSTANT <1S X-RAY + AI DISPATCH) -->
       <div class="platen-deck">
         <div class="platen-top">
           <div class="platen-heading">
-            <span class="platen-tag">LIVE ASSIGNMENT TELETYPE</span>
-            <span class="platen-sub">Paste any Pons <code>0x</code> CA, wallet, stock ticker (<code>TSLA</code>, <code>NVDA</code>), or question — an AI desk researches live chain data &amp; checks every quote verbatim.</span>
+            <span class="platen-tag">⚡ &lt;1S TOKEN &amp; CLONE X-RAY + LIVE AI WIRE</span>
+            <span class="platen-sub">Paste any Pons <code>0x</code> CA, URL, wallet, or stock ticker (<code>TSLA</code>, <code>NVDA</code>) — get an <strong>instant &lt;1s risk &amp; whale X-ray</strong> (unlimited, 0-wallet), or dispatch a deep <code>gpt-5.4</code> audit.</span>
           </div>
-          <div class="quota-readout" id="quotaReadout">FREE QUOTA: 3 / DAY · 0-WALLET</div>
+          <div class="quota-readout" id="quotaReadout">X-RAY: UNLIMITED · AI WIRE: 3/DAY</div>
         </div>
 
         <form class="platen-form" id="dispatchForm">
-          <div class="desk-keys" role="radiogroup" aria-label="Select Editorial Desk">
+          <div class="platen-input-row">
+            <input
+              type="text"
+              id="dispatchInput"
+              class="platen-input"
+              placeholder="Paste Pons 0x CA, URL, wallet, ticker (TSLA, NVDA) — or ask an AI desk question…"
+              maxlength="280"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="submit" class="transmit-btn xray-primary-btn" id="instantXrayBtn">⚡ X-RAY (&lt;1S)</button>
+            <button type="button" class="deep-wire-btn" id="deepWireBtn" title="Run full multi-turn gpt-5.4 AI desk investigation">DEEP AI WIRE ↵</button>
+            <button type="button" class="flash-toggle-btn" id="toggleBurnInputBtn" title="Jump to #1 in AI queue with a 50K $WIRECOPY burn tx">🔥 FLASH</button>
+          </div>
+
+          <div class="desk-keys" role="radiogroup" aria-label="Select Editorial Desk for Deep AI Wire">
+            <span class="preset-lbl" style="margin-right:4px;">AI DESK:</span>
             <button type="button" class="desk-key active" data-desk="">AUTO</button>
             <button type="button" class="desk-key" data-desk="equities" title="Tokenized stocks vs Chainlink oracles">EQT · Equities</button>
             <button type="button" class="desk-key" data-desk="curves" title="Pons bonding curves & holders">CRV · Curves</button>
@@ -122,35 +138,24 @@
             <button type="button" class="desk-key" data-desk="morgue" title="Compare against earlier saved findings">MRG · Morgue</button>
           </div>
 
-          <div class="platen-input-row">
-            <input
-              type="text"
-              id="dispatchInput"
-              class="platen-input"
-              placeholder="e.g. How far is TSLA from its Chainlink oracle? · Are there fake NVDA tokens on Pons? · 0xcd5c…a8f7"
-              maxlength="280"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <button type="button" class="flash-toggle-btn" id="toggleBurnInputBtn" title="Jump to #1 in queue with a 50K $WIRECOPY burn tx">⚡ FLASH BURN</button>
-            <button type="submit" class="transmit-btn" id="transmitBtn">TRANSMIT WIRE ↵</button>
-          </div>
-
           <div class="burn-drawer" id="burnDrawer" hidden>
             <label for="burnTxInput">FLASH BULLETIN PRIORITY (burn <code>50,000 $WIRECOPY</code> to <code>0x000000000000000000000000000000000000dEaD</code>, paste tx hash):</label>
             <input type="text" id="burnTxInput" placeholder="0x… Robinhood Chain burn transaction hash" spellcheck="false" />
           </div>
 
-          <div class="punch-presets">
-            <span class="preset-lbl">PUNCH CARDS:</span>
-            <button type="button" class="punch-chip" data-desk="equities" data-q="How close do the TSLA and NVDA tokens trade to their Chainlink oracles right now?">TSLA &amp; NVDA Oracle Gap</button>
-            <button type="button" class="punch-chip" data-desk="risk" data-q="Are there unofficial Pons tokens copying tickers like TSLA or NVDA, and how big are they?">Fake Stock Clones on Pons</button>
-            <button type="button" class="punch-chip" data-desk="curves" data-q="Which Pons launches are trending right now by market cap, volume, and curve progress?">Trending Pons Curves</button>
-            <button type="button" class="punch-chip" data-desk="defi" data-q="Which Robinhood Chain protocols lead by DeFi TVL and 24h DEX volume today?">Chain TVL &amp; DEX Leaders</button>
-            <button type="button" class="punch-chip" data-desk="chain" data-q="0xcd5c01ea857df6253323a1bde87cd1d3a442a8f7">Inspect 0xcd5c…a8f7</button>
+          <!-- LIVE TRENCH RADAR CHIPS (1-CLICK <1S X-RAY) -->
+          <div class="punch-presets" id="liveRadarBar">
+            <span class="preset-lbl">● LIVE PONS TAPE (1-CLICK X-RAY):</span>
+            <button type="button" class="radar-chip is-warn" data-xray="TSLA">TSLA · Clone Audit</button>
+            <button type="button" class="radar-chip is-danger" data-xray="0xaa5565fa0b8dec9914533e8ae2435b85af6088cd">0xaa55… Fake TSLA</button>
+            <button type="button" class="radar-chip" data-xray="NVDA">NVDA · Oracle + Clones</button>
+            <button type="button" class="punch-chip" data-desk="defi" data-q="Which Robinhood Chain protocols lead by DeFi TVL and 24h DEX volume today?">AI: Chain TVL Leaders</button>
           </div>
           <div class="form-feedback" id="dispatchFeedback" role="status"></div>
         </form>
+
+        <!-- INSTANT <1S TRADER X-RAY VERDICT PANEL -->
+        <div class="xray-card" id="xrayResultCard" hidden></div>
       </div>
 
       <!-- ASYMMETRIC 3-COLUMN NEWSPAPER FRONT PAGE -->
@@ -401,7 +406,7 @@
             </tbody>
           </table>
           <p class="classified-foot" style="margin-top:10px;">
-            <strong>⚡ Flash Bulletin Burn:</strong> Send <code>50,000 $WIRECOPY</code> to <code>0x…dEaD</code> and paste the tx hash to jump to #1 ahead of every tier. Creator fees: 50% fund AI desk inference, 50% buy back &amp; burn.
+            <strong>⚡ Flash Bulletin Burn:</strong> Send <code>50,000 $WIRECOPY</code> to <code>0x…dEaD</code> and paste the tx hash to jump to #1 ahead of every tier — verified directly from onchain <code>Transfer</code> logs on Robinhood Chain (<code>4663</code>).
           </p>
 
           <hr class="box-rule" />

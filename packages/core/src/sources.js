@@ -450,12 +450,12 @@ const TOOLS = {
 
   async token_holders(ctx, { address: a0 }) {
     const a = mustAddr(a0, "token");
-    const [supplyHex, decHex] = await Promise.all([ethCall(ctx, a, "0x18160ddd"), ethCall(ctx, a, "0x313ce567")]);
-    const decimals = Number(word(decHex, 0)) || 18;
-    const supply = round(units(word(supplyHex, 0), decimals), 2);
     const url = `${PONS_BALANCES}/tokens/${a}/holders?limit=20`;
-    const j = await withCache(ctx, "holders:" + a, 3 * 60000, () => fetchJson(url, ctx, 1)).catch(() => null);
+    const j = await withCache(ctx, "holders:" + a, 90 * 1000, () => fetchJson(url, ctx, 1)).catch(() => null);
     if (!j?.page) {
+      const [supplyHex, decHex] = await Promise.all([ethCall(ctx, a, "0x18160ddd"), ethCall(ctx, a, "0x313ce567")]);
+      const decimals = Number(word(decHex, 0)) || 18;
+      const supply = round(units(word(supplyHex, 0), decimals), 2);
       return {
         source: "Robinhood Chain RPC totalSupply + decimals",
         address: a,
@@ -464,6 +464,10 @@ const TOOLS = {
         note: "Onchain supply verified via RPC; holder breakdown is indexed for Pons launchpad tokens.",
       };
     }
+    const decimals = 18;
+    const supply = j.supply ? round(units(BigInt(j.supply), decimals), 2) : 1_000_000_000;
+    const burnedUnits = j.burned ? round(units(BigInt(j.burned), decimals), 2) : 0;
+    const burnedApiPct = supply > 0 ? round((burnedUnits / supply) * 100, 2) : 0;
     const top = j.page.map((h, i) => ({
       rank: i + 1,
       wallet: h.wallet,
@@ -476,6 +480,7 @@ const TOOLS = {
       source: url,
       address: a,
       supply,
+      burned_pct: burnedApiPct,
       decimals,
       holders: j.holders,
       top1_share_pct: sum(1),
@@ -650,3 +655,381 @@ export async function runWireTool(ctx, name, args = {}) {
   const { why: _why, ...cleanArgs } = args || {};
   return fn(ctx, cleanArgs);
 }
+
+const BURN_ADDRESSES = new Set([
+  "0x000000000000000000000000000000000000dead",
+  "0x0000000000000000000000000000000000000000",
+]);
+
+function isVaultOrBurnHolder(h, curveAddr, poolAddr) {
+  const w = String(h?.wallet || "").toLowerCase();
+  if (!w) return false;
+  if (BURN_ADDRESSES.has(w)) return true;
+  if (curveAddr && w === curveAddr.toLowerCase()) return true;
+  if (poolAddr && w === poolAddr.toLowerCase()) return true;
+  const lbl = String(h?.label || "").toLowerCase();
+  if (lbl && /curve|pool|burn|dead|vault|uniswap|launchpad|pair|lp/.test(lbl)) return true;
+  return false;
+}
+
+export async function getLiveTrenchRadar(ctx = {}) {
+  return withCache(ctx, "radar:live:v1", 60 * 1000, async () => {
+    const [trendingRes, newRes, stocks] = await Promise.all([
+      TOOLS.pons_launches(ctx, { sort: "trending", limit: 8 }).catch(() => ({ launches: [] })),
+      TOOLS.pons_launches(ctx, { sort: "new", limit: 6 }).catch(() => ({ launches: [] })),
+      stockRegistry(ctx).catch(() => []),
+    ]);
+    const stockSymbols = new Map(stocks.map((s) => [s.symbol.toUpperCase(), s]));
+    const seen = new Set();
+    const items = [];
+    for (const row of [...(trendingRes.launches || []), ...(newRes.launches || [])]) {
+      if (!row?.address || seen.has(row.address)) continue;
+      seen.add(row.address);
+      const sym = String(row.symbol || "").toUpperCase();
+      const official = stockSymbols.get(sym);
+      items.push({
+        address: row.address,
+        symbol: row.symbol || "TOKEN",
+        name: row.name || row.symbol || "Token",
+        stage: row.stage,
+        curve_progress_pct: row.curve_progress_pct,
+        market_cap_usd: row.market_cap_usd,
+        volume_usd: row.volume_usd,
+        creator_tax_bps: row.creator_tax_bps,
+        is_stock_clone: Boolean(official && official.address !== row.address),
+      });
+      if (items.length >= 8) break;
+    }
+    return {
+      updated_at: Date.now(),
+      items,
+      presets: [
+        { label: "TSLA Clone Audit", query: "TSLA", kind: "clone-check" },
+        { label: "NVDA Oracle + Clones", query: "NVDA", kind: "oracle" },
+        { label: "TSLA Curve Clone (0xaa55…)", query: "0xaa5565fa0b8dec9914533e8ae2435b85af6088cd", kind: "trap" },
+      ],
+    };
+  });
+}
+
+export async function runInstantXray(ctx = {}, rawInput = "") {
+  const started = Date.now();
+  const trimmed = String(rawInput || "").trim();
+  if (!trimmed) bad("Paste a 0x token/wallet address or ticker (e.g. TSLA, NVDA).");
+
+  // Extract 0x address even if user pasted a full Pons / Blockscout / DexScreener URL
+  const addrMatch = trimmed.match(/0x[0-9a-fA-F]{40}/);
+  const extractedAddr = addrMatch ? addrMatch[0].toLowerCase() : null;
+
+  if (!extractedAddr) {
+    // Ticker / symbol mode
+    const qUp = trimmed.replace(/^\$/, "").trim().toUpperCase();
+    const [stocks, search] = await Promise.all([
+      stockRegistry(ctx).catch(() => []),
+      TOOLS.token_search(ctx, { query: qUp.length >= 2 ? qUp : trimmed }).catch(() => ({ stock_tokens: [], pons_launches: [] })),
+    ]);
+
+    const official = stocks.find((s) => s.symbol.toUpperCase() === qUp);
+    const launches = search.pons_launches || [];
+
+    if (official) {
+      const clones = launches.filter((l) => l.address && l.address !== official.address);
+      const [oracleRes, topCloneHolders] = await Promise.all([
+        TOOLS.stock_oracle(ctx, { symbol: official.symbol }).catch(() => null),
+        clones[0]?.address ? TOOLS.token_holders(ctx, { address: clones[0].address }).catch(() => null) : Promise.resolve(null),
+      ]);
+
+      const spotUsd = oracleRes?.token_price_usd ?? null;
+      const oracleUsd = typeof oracleRes?.oracle === "object" ? oracleRes.oracle?.price_usd ?? null : null;
+      const spreadPct = oracleRes?.token_vs_oracle_pct ?? null;
+
+      const flags = [];
+      if (clones.length > 0) {
+        const c0 = clones[0];
+        const cHold = topCloneHolders?.top10_unlabeled_share_pct ?? topCloneHolders?.top10_share_pct;
+        flags.push({
+          severity: "danger",
+          text: `${clones.length} unofficial "${official.symbol}" bonding-curve clone(s) found on Pons! Top clone ${c0.address.slice(0, 8)}… has $${(c0.volume_usd || 0).toLocaleString()} vol${cHold != null ? ` & ${cHold}% top-10 hold` : ""}.`,
+        });
+      } else {
+        flags.push({
+          severity: "safe",
+          text: `Zero active Pons curve clones found matching ${official.symbol} right now.`,
+        });
+      }
+      if (official.multiplier && official.multiplier !== 1) {
+        flags.push({
+          severity: "info",
+          text: `Corporate-action multiplier ${round(official.multiplier, 6)}x active on official token (${official.isin || "ISIN verified"}).`,
+        });
+      }
+
+      return {
+        kind: "stock_ticker",
+        elapsed_ms: Date.now() - started,
+        query: qUp,
+        level: clones.length > 0 ? "warn" : "safe",
+        badge: clones.length > 0 ? `OFFICIAL STOCK + ${clones.length} CLONE TRAP(S)` : "OFFICIAL ISIN STOCK",
+        title: `${official.name} ($${official.symbol})`,
+        address: official.address,
+        explorer: `https://robinhoodchain.blockscout.com/address/${official.address}`,
+        metrics: [
+          { label: "OFFICIAL CONTRACT", value: `${official.address.slice(0, 8)}…${official.address.slice(-6)}`, tone: "safe" },
+          { label: "ISIN REGISTRY", value: official.isin || "VERIFIED", tone: "safe" },
+          { label: "TOKEN SPOT PRICE", value: spotUsd != null ? `$${spotUsd}` : "—", tone: "neutral" },
+          { label: "CHAINLINK ORACLE", value: oracleUsd != null ? `$${oracleUsd}` : "—", tone: "neutral" },
+          { label: "ORACLE SPREAD", value: spreadPct != null ? `${spreadPct > 0 ? "+" : ""}${spreadPct}%` : "0.00%", tone: Math.abs(spreadPct || 0) > 1.5 ? "warn" : "safe" },
+          { label: "PONS CLONES FOUND", value: String(clones.length), tone: clones.length > 0 ? "danger" : "safe" },
+        ],
+        flags,
+        official_stock: official,
+        clones: clones.slice(0, 5),
+      };
+    }
+
+    // Non-stock ticker -> jump straight into full 0x X-ray of #1 matching Pons launch!
+    if (launches.length > 0 && launches[0].address) {
+      const xray = await runInstantXray(ctx, launches[0].address);
+      xray.other_matches = launches.slice(1, 5);
+      return xray;
+    }
+
+    bad(`No Robinhood stock token or Pons curve found matching "${trimmed}". Paste a 0x address.`);
+  }
+
+  // 0x Address Mode — fast parallel burst across stock registry, Pons, holders & minimal RPC
+  const address = extractedAddr;
+  const [stocks, pons, holders] = await Promise.all([
+    stockRegistry(ctx).catch(() => []),
+    TOOLS.pons_token(ctx, { address }).catch(() => null),
+    TOOLS.token_holders(ctx, { address }).catch(() => null),
+  ]);
+  const account = !pons
+    ? await TOOLS.account_info(ctx, { address }).catch(() => ({ address, kind: "unknown", eth_balance: 0, transactions_sent: 0 }))
+    : { address, kind: "contract", eth_balance: 0, transactions_sent: 0 };
+  const pairsRes = !pons && account.kind === "contract" ? await TOOLS.token_pairs(ctx, { address }).catch(() => null) : null;
+
+  const officialExact = stocks.find((s) => s.address === address);
+  if (officialExact) {
+    const [oracleRes, searchRes] = await Promise.all([
+      TOOLS.stock_oracle(ctx, { symbol: officialExact.symbol }).catch(() => null),
+      TOOLS.token_search(ctx, { query: officialExact.symbol }).catch(() => ({ pons_launches: [] })),
+    ]);
+    const clones = (searchRes.pons_launches || []).filter((l) => l.address && l.address !== address);
+    const spotUsd = oracleRes?.token_price_usd ?? null;
+    const oracleUsd = typeof oracleRes?.oracle === "object" ? oracleRes.oracle?.price_usd ?? null : null;
+    const spreadPct = oracleRes?.token_vs_oracle_pct ?? null;
+
+    return {
+      kind: "official_stock",
+      elapsed_ms: Date.now() - started,
+      query: address,
+      level: "safe",
+      badge: "OFFICIAL ISIN EQUITY TOKEN",
+      title: `${officialExact.name} ($${officialExact.symbol})`,
+      address,
+      explorer: `https://robinhoodchain.blockscout.com/address/${address}`,
+      metrics: [
+        { label: "ISIN CODE", value: officialExact.isin || "VERIFIED", tone: "safe" },
+        { label: "MULTIPLIER", value: `${round(officialExact.multiplier || 1, 6)}x`, tone: "neutral" },
+        { label: "TOKEN PRICE", value: spotUsd != null ? `$${spotUsd}` : "—", tone: "neutral" },
+        { label: "CHAINLINK ORACLE", value: oracleUsd != null ? `$${oracleUsd}` : "—", tone: "neutral" },
+        { label: "ORACLE SPREAD", value: spreadPct != null ? `${spreadPct > 0 ? "+" : ""}${spreadPct}%` : "—", tone: Math.abs(spreadPct || 0) > 1.5 ? "warn" : "safe" },
+        { label: "IMPOSTER CLONES", value: String(clones.length), tone: clones.length > 0 ? "warn" : "safe" },
+      ],
+      flags: [
+        { severity: "safe", text: `Verified official Robinhood Chain equity contract (${officialExact.isin || officialExact.symbol}).` },
+        ...(clones.length > 0
+          ? [{ severity: "warn", text: `Watch out: ${clones.length} unofficial curve clone(s) also use ticker $${officialExact.symbol} on Pons.` }]
+          : []),
+      ],
+      official_stock: officialExact,
+      clones: clones.slice(0, 4),
+    };
+  }
+
+  // Plain EOA Wallet check
+  if (account.kind === "wallet" && !pons && !holders?.supply) {
+    const act = await TOOLS.wallet_activity(ctx, { address, limit: 8 }).catch(() => null);
+    return {
+      kind: "wallet",
+      elapsed_ms: Date.now() - started,
+      query: address,
+      level: "info",
+      badge: account.transactions_sent < 5 ? "FRESH EOA WALLET" : "ROBINHOOD CHAIN WALLET",
+      title: `Wallet ${address.slice(0, 8)}…${address.slice(-6)}`,
+      address,
+      explorer: `https://robinhoodchain.blockscout.com/address/${address}`,
+      metrics: [
+        { label: "ETH BALANCE", value: `${account.eth_balance} ETH`, tone: "neutral" },
+        { label: "TXS SENT (NONCE)", value: String(account.transactions_sent), tone: account.transactions_sent < 5 ? "warn" : "neutral" },
+        { label: "RECENT TRANSFERS", value: String(act?.transfers ?? 0), tone: "neutral" },
+        { label: "TOKENS TOUCHED", value: String(act?.tokens_touched ?? 0), tone: "neutral" },
+      ],
+      flags: [
+        account.transactions_sent < 5
+          ? { severity: "warn", text: `Fresh wallet (${account.transactions_sent} outgoing txs) — treat cautiously if deploying curves.` }
+          : { severity: "info", text: `Active EOA with ${account.transactions_sent} outgoing transactions and ${account.eth_balance} ETH.` },
+      ],
+    };
+  }
+
+  // Token Contract X-Ray (Pons Bonding Curve / Graduated / ERC-20)
+  const topPair = Array.isArray(pairsRes?.pairs) ? pairsRes.pairs[0] : null;
+  const symbol = String(pons?.symbol || pairsRes?.token?.symbol || "TOKEN");
+  const name = String(pons?.name || pairsRes?.token?.name || symbol);
+  const officialSameSymbol = stocks.find(
+    (s) => s.symbol.toUpperCase() === symbol.toUpperCase() && s.address !== address
+  );
+  const isStockClone = Boolean(officialSameSymbol);
+
+  const curveAddr = typeof pons?.curve === "string" ? pons.curve : pons?.curve?.address || "";
+  const poolAddr = typeof pons?.pool === "string" ? pons.pool : pons?.pool?.address || topPair?.pair || "";
+  const deployer = pons?.deployer ? String(pons.deployer).toLowerCase() : null;
+
+  const deployerInfo = deployer
+    ? await TOOLS.account_info(ctx, { address: deployer }).catch(() => null)
+    : null;
+
+  const holderRows = holders?.top || [];
+  const burnedPct = Math.max(
+    holders?.burned_pct || 0,
+    round(
+      holderRows
+        .filter((h) => BURN_ADDRESSES.has(String(h.wallet || "").toLowerCase()))
+        .reduce((s, h) => s + (h.share_pct || 0), 0),
+      2
+    )
+  );
+  const realWhales = holderRows.filter((h) => !isVaultOrBurnHolder(h, curveAddr, poolAddr));
+  const realTop10Pct = holderRows.length
+    ? round(realWhales.slice(0, 10).reduce((s, h) => s + (h.share_pct || 0), 0), 2)
+    : null;
+  const realTop1Pct = realWhales[0]?.share_pct ?? null;
+  const deployerHoldPct = deployer
+    ? round(
+        holderRows
+          .filter((h) => String(h.wallet || "").toLowerCase() === deployer)
+          .reduce((s, h) => s + (h.share_pct || 0), 0),
+        2
+      )
+    : null;
+
+  const taxBps = pons?.creator_tax_bps ?? null;
+  const taxPct = taxBps != null ? round(taxBps / 100, 2) : null;
+  const mcapUsd = pons?.market_cap_usd ?? topPair?.market_cap_usd ?? null;
+  const volUsd = pons?.volume_usd ?? topPair?.volume_24h_usd ?? null;
+  const stage = pons?.stage || (topPair ? "dex" : "erc20");
+  const curvePct = pons?.curve_progress_pct ?? (stage === "graduated" ? 100 : null);
+
+  const flags = [];
+  if (isStockClone) {
+    flags.push({
+      severity: "danger",
+      text: `UNOFFICIAL STOCK CLONE: Uses ticker $${symbol.toUpperCase()}, NOT the real Robinhood equity token (${officialSameSymbol.address.slice(0, 8)}… · ${officialSameSymbol.isin || "ISIN"}).`,
+    });
+  }
+  if (realTop10Pct != null && realTop10Pct >= 60) {
+    flags.push({
+      severity: "danger",
+      text: `Extreme holder concentration: non-pool top-10 wallets control ${realTop10Pct}% of supply (#1 holds ${realTop1Pct}%).`,
+    });
+  } else if (realTop10Pct != null && realTop10Pct >= 35) {
+    flags.push({
+      severity: "warn",
+      text: `Elevated whale concentration: non-pool top-10 wallets hold ${realTop10Pct}% of supply (#1 holds ${realTop1Pct}%).`,
+    });
+  } else if (realTop10Pct != null) {
+    flags.push({
+      severity: "safe",
+      text: `Healthy distribution: non-pool top-10 wallets hold ${realTop10Pct}% of supply.`,
+    });
+  }
+
+  if (taxBps != null && taxBps >= 300) {
+    flags.push({
+      severity: "warn",
+      text: `Creator tax is ${taxBps} bps (${taxPct}% per trade on top of base curve fee).`,
+    });
+  }
+  if (deployerHoldPct != null) {
+    if (deployerHoldPct >= 15) {
+      flags.push({
+        severity: "danger",
+        text: `Deployer (${deployer.slice(0, 8)}…) still holds ${deployerHoldPct}% of supply (${deployerInfo?.transactions_sent ?? "?"} total txs).`,
+      });
+    } else if (deployerHoldPct === 0 && burnedPct > 0) {
+      flags.push({
+        severity: "safe",
+        text: `Deployer holds 0% in top-20 and ${burnedPct}% of supply is burned at 0x…dEaD.`,
+      });
+    }
+  } else if (burnedPct > 0) {
+    flags.push({
+      severity: "safe",
+      text: `${burnedPct}% of total supply confirmed burned at 0x…dEaD / 0x0000.`,
+    });
+  }
+
+  let level = "safe";
+  let badge = stage === "graduated" ? "GRADUATED · CLEAN" : "ACTIVE PONS CURVE";
+  if (isStockClone) {
+    level = "danger";
+    badge = "DANGER · FAKE STOCK CLONE";
+  } else if ((realTop10Pct != null && realTop10Pct >= 65) || (deployerHoldPct != null && deployerHoldPct >= 20) || (taxBps != null && taxBps >= 450)) {
+    level = "danger";
+    badge = "HIGH DUMP / TAX RISK";
+  } else if ((realTop10Pct != null && realTop10Pct >= 35) || (taxBps != null && taxBps >= 250) || (deployerHoldPct != null && deployerHoldPct >= 10)) {
+    level = "warn";
+    badge = "CAUTION · WATCH WHALES / TAX";
+  }
+
+  return {
+    kind: "token",
+    elapsed_ms: Date.now() - started,
+    query: address,
+    level,
+    badge,
+    title: `${name} ($${symbol})`,
+    symbol,
+    address,
+    pons_url: pons ? `https://ponsfamily.com/launchpad/${address}` : null,
+    explorer: `https://robinhoodchain.blockscout.com/address/${address}`,
+    metrics: [
+      {
+        label: "STAGE / CURVE",
+        value: stage === "graduated" ? "GRADUATED (100%)" : curvePct != null ? `CURVE ${curvePct}%` : stage.toUpperCase(),
+        tone: stage === "graduated" ? "safe" : "neutral",
+      },
+      {
+        label: "MCAP / 24H VOL",
+        value: `${mcapUsd != null ? "$" + mcapUsd.toLocaleString() : "—"} / ${volUsd != null ? "$" + volUsd.toLocaleString() : "$0"}`,
+        tone: "neutral",
+      },
+      {
+        label: "CREATOR TAX",
+        value: taxBps != null ? `${taxPct}% (${taxBps} bps)` : "0% / N/A",
+        tone: taxBps >= 300 ? "warn" : "safe",
+      },
+      {
+        label: "WHALE TOP-10",
+        value: realTop10Pct != null ? `${realTop10Pct}% (#1: ${realTop1Pct ?? 0}%)` : "—",
+        tone: realTop10Pct >= 60 ? "danger" : realTop10Pct >= 35 ? "warn" : "safe",
+      },
+      {
+        label: "DEV HELD / BURNED",
+        value: `${deployerHoldPct != null ? deployerHoldPct + "%" : "0%"} / ${burnedPct}%🔥`,
+        tone: deployerHoldPct >= 15 ? "danger" : burnedPct > 0 ? "safe" : "neutral",
+      },
+      {
+        label: "DEPLOYER WALLET",
+        value: deployer ? `${deployer.slice(0, 6)}… (${deployerInfo?.transactions_sent ?? "?"} txs)` : "—",
+        tone: deployerInfo && deployerInfo.transactions_sent < 5 ? "warn" : "neutral",
+      },
+    ],
+    flags,
+    official_stock_collision: officialSameSymbol || null,
+    top_whales: realWhales.slice(0, 5),
+  };
+}
+
