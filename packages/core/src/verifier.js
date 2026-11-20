@@ -62,7 +62,10 @@ export async function rhRpcCall(rpcUrl, method, params = [], fetchImpl = fetch) 
   for (let attempt = 0; attempt < 3; attempt++) {
     const res = await fetchImpl(url, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "user-agent": "WireCopy/1.0 (+https://trywirecopy.com)",
+      },
       body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
     });
     if ((res.status === 429 || res.status >= 500) && attempt < 2) {

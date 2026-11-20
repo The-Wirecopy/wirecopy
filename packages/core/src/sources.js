@@ -179,7 +179,9 @@ const TOOLS = {
     const [all, list] = await Promise.all([stockRegistry(ctx), chainlinkFeeds(ctx)]);
     const t = all.find((x) => x.symbol.toUpperCase() === s);
     if (!t) bad(`${s} is not on the official Robinhood stock token registry`);
-    const f = list.find((x) => x.name.toUpperCase() === `ROBINHOOD ${s} / USD`);
+    const escSym = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const feedRe = new RegExp(`^ROBINHOOD\\s+${escSym}\\s*(?:/\\s*USD|-USD|\\(24/7\\))`, "i");
+    const f = list.find((x) => feedRe.test(x.name) && /\(24\/7\)/i.test(x.name)) || list.find((x) => feedRe.test(x.name));
     const [px, o] = await Promise.all([
       llamaPrices(ctx, [t.address]).catch(() => ({})),
       f ? readOracle(ctx, f).catch(() => null) : null,
@@ -887,9 +889,12 @@ export async function runInstantXray(ctx = {}, rawInput = "") {
   const poolAddr = typeof pons?.pool === "string" ? pons.pool : pons?.pool?.address || topPair?.pair || "";
   const deployer = pons?.deployer ? String(pons.deployer).toLowerCase() : null;
 
-  const deployerInfo = deployer
-    ? await TOOLS.account_info(ctx, { address: deployer }).catch(() => null)
+  const deployerTxCount = deployer
+    ? await rpc(ctx, "eth_getTransactionCount", [deployer, "latest"])
+        .then((hex) => parseInt(hex || "0x0", 16))
+        .catch(() => null)
     : null;
+  const deployerInfo = deployerTxCount != null ? { transactions_sent: deployerTxCount } : null;
 
   const holderRows = holders?.top || [];
   const burnedPct = Math.max(
