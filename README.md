@@ -85,7 +85,7 @@ npm run dev
 
 ## 0-Wallet Read-Only Access Tiers
 
-WIRECOPY never asks visitors to click `Connect Wallet` or sign messages. Optional `$WIRECOPY` holder tiers (`Press Pass >= 1,000,000`, `Bureau Chief >= 5,000,000`) are verified 100% read-only via `eth_call balanceOf(0x...)` on Robinhood Chain (`4663`), and burning `50,000 $WIRECOPY` to `0x000000000000000000000000000000000000dEaD` grants instant #1 Flash Bulletin priority by transaction hash.
+WIRECOPY never asks visitors to click `Connect Wallet` or sign messages. Optional `$WCOPY` holder tiers (`Press Pass >= 1,000,000`, `Bureau Chief >= 5,000,000`) are verified 100% read-only via `eth_call balanceOf(0x...)` on Robinhood Chain (`4663`), and burning `50,000 $WCOPY` to `0x000000000000000000000000000000000000dEaD` grants instant #1 Flash Bulletin priority by transaction hash.
 
 ## License
 

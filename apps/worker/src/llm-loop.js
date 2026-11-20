@@ -56,7 +56,7 @@ Rules:
 - State ONLY numbers returned by a tool in this conversation, naming the source (Robinhood registry, Chainlink RPC, Pons, Sherwood, DeFiLlama, DexScreener, Chain RPC, or the Morgue).
 - If a question needs a full multi-step investigation, tell the reader to transmit it on the Front Page teletype so a Desk files it onto the permanent wire.
 - Never tell anyone to buy, sell, or hold. Never ask for private keys or wallet signatures.
-- If asked about $WIRECOPY: it is the press token of the bureau on Pons (Robinhood Chain); read-only balance checks unlock higher Press Pass & Bureau Chief quotas without connecting a wallet, and burning 50,000 $WIRECOPY sends a Flash Bulletin straight to #1 in the queue.`;
+- If asked about $WCOPY: it is the press token of the bureau on Pons (Robinhood Chain); read-only balance checks unlock higher Press Pass & Bureau Chief quotas without connecting a wallet, and burning 50,000 $WCOPY sends a Flash Bulletin straight to #1 in the queue.`;
 
 export async function executeMission(env, ctx, mission, { logStep, saveFinding, loadStepBody }) {
   const desk = DESKS[mission.agent] || DESKS.curves;

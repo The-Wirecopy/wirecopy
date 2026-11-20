@@ -51,7 +51,7 @@ API_PRESS = "5000"
 API_CHIEF = "50000"
 # Patched at deploy / launch
 TAPE_REGISTRY_ADDRESS = ""
-TOKEN_ADDRESS = ""
+TOKEN_ADDRESS = "0x96dFf829d389c196C5B34fcc11aDf59caC489ECD"
 SITE_URL = "https://trywirecopy.com"
 
 # Secrets (set via wrangler secret put):

@@ -5,9 +5,9 @@
  *  - Zero `Connect Wallet` / `personal_sign` popups required anywhere.
  *  - Visitors read live dispatches, search the Morgue, explore the Entity Graph, verify Merkle proofs,
  *    chat with the Copy Chief, and transmit free live dispatches immediately.
- *  - Holding `$WIRECOPY` (>= 1M Press Pass, >= 5M Bureau Chief) is checked 100% read-only via
+ *  - Holding `$WCOPY` (>= 1M Press Pass, >= 5M Bureau Chief) is checked 100% read-only via
  *    `eth_call balanceOf(0x...)` on Robinhood Chain (4663) by pasting any public 0x address.
- *  - Burning 50,000 `$WIRECOPY` to `0x...dEaD` jumps straight to #1 in the dispatch queue by tx hash.
+ *  - Burning 50,000 `$WCOPY` to `0x...dEaD` jumps straight to #1 in the dispatch queue by tx hash.
  */
 
 import {
@@ -236,7 +236,7 @@ async function getGlobalToday(env, kind) {
 }
 
 async function claimFlashBurn(env, txHashRaw) {
-  if (!env.TOKEN_ADDRESS) throw fail(400, "Flash Bulletin burns activate as soon as $WIRECOPY is live on Pons");
+  if (!env.TOKEN_ADDRESS) throw fail(400, "Flash Bulletin burns activate as soon as $WCOPY is live on Pons");
   const tx = String(txHashRaw || "").trim().toLowerCase();
   if (!isEvmTxHash(tx)) throw fail(400, "burn_tx must be a 66-character 0x transaction hash");
   if (await env.DB.prepare("SELECT 1 FROM burns WHERE tx = ?").bind(tx).first()) {
@@ -254,7 +254,7 @@ async function claimFlashBurn(env, txHashRaw) {
   const dec = Number(env.TOKEN_DECIMALS || 18);
   const need = BigInt(tierConfig(env).burn_flash) * 10n ** BigInt(dec);
   if (!sender || raw < need) {
-    throw fail(400, `Burn at least ${tierConfig(env).burn_flash.toLocaleString("en-US")} $WIRECOPY to 0x...dEaD`);
+    throw fail(400, `Burn at least ${tierConfig(env).burn_flash.toLocaleString("en-US")} $WCOPY to 0x...dEaD`);
   }
   const amount = Number(raw / 10n ** BigInt(dec));
   await env.DB.prepare("INSERT INTO burns (tx, wallet, amount, created) VALUES (?, ?, ?, ?)")
@@ -611,7 +611,7 @@ async function enqueueDispatch(env, req, body, ctxExec) {
       throw fail(
         429,
         tier.name === "free" && env.TOKEN_ADDRESS
-          ? `Daily free dispatches (${tier.ask}) used. Paste a wallet holding >=1M $WIRECOPY (0-wallet read-only) or burn ${tierConfig(env).burn_flash.toLocaleString("en-US")} to jump first.`
+          ? `Daily free dispatches (${tier.ask}) used. Paste a wallet holding >=1M $WCOPY (0-wallet read-only) or burn ${tierConfig(env).burn_flash.toLocaleString("en-US")} to jump first.`
           : "Daily dispatch quota used for this tier."
       );
     }
@@ -752,7 +752,7 @@ async function issueReadOnlyKey(env, body) {
     label: tier.label,
     holds: tier.holds,
     daily_api_limit: tier.api,
-    note: "0-wallet read-only MCP key issued. Quota scales automatically with the $WIRECOPY balance held by this address.",
+    note: "0-wallet read-only MCP key issued. Quota scales automatically with the $WCOPY balance held by this address.",
   };
 }
 
@@ -867,7 +867,7 @@ async function handleMcp(req, env, ctxExec) {
       const who = whoKey(req, caller);
       const tier = await resolveTier(env, caller);
       if ((await getUsage(env, who, "api")) >= tier.api) {
-        throw fail(429, `Daily MCP call quota (${tier.api}) reached. Pass X-Wallet-Address holding >=1M $WIRECOPY for 5,000+/day.`);
+        throw fail(429, `Daily MCP call quota (${tier.api}) reached. Pass X-Wallet-Address holding >=1M $WCOPY for 5,000+/day.`);
       }
       await bumpUsage(env, who, "api");
 
@@ -942,7 +942,7 @@ WIRECOPY operates 6 autonomous AI research desks (Equities, Curves, DeFi, Risk, 
 - Optional Read-Only Press Pass Header: \`X-Wallet-Address: 0xYourPublicRobinhoodWallet\` (reads \`balanceOf\` onchain, zero signatures)
 
 ## Token & Onchain Contracts (Chain ID 4663)
-- Token ($WIRECOPY): ${env.TOKEN_ADDRESS || "ANNOUNCING_ON_X"}
+- Token ($WCOPY): ${env.TOKEN_ADDRESS || "ANNOUNCING_ON_X"}
 - WireTapeRegistry (Sourcify exact_match): ${env.TAPE_REGISTRY_ADDRESS || "DEPLOYING_ON_4663"}
 
 ## REST API
@@ -1069,7 +1069,7 @@ export default {
           const who = whoKey(req, caller);
           const usedNow = await getUsage(env, who, "chat");
           if (usedNow >= tier.chat) {
-            throw fail(429, `Daily Copy Chief messages (${tier.chat}) used. Paste a Press Pass wallet (>=1M $WIRECOPY) for 100/day.`);
+            throw fail(429, `Daily Copy Chief messages (${tier.chat}) used. Paste a Press Pass wallet (>=1M $WCOPY) for 100/day.`);
           }
           await bumpUsage(env, who, "chat");
           const msgs = normalizeChatHistory(body.messages);

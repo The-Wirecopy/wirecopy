@@ -1,7 +1,7 @@
 // WIRECOPY Front-Page Teletype, Live Step Streamer, Morgue, Graph, Copy Chief & Merkle Proof Verifier
 export const SITE_CONFIG = {
   apiBase: "",
-  tokenCa: "",
+  tokenCa: "0x96dFf829d389c196C5B34fcc11aDf59caC489ECD",
   tapeRegistry: "",
   xUrl: "https://x.com/wirecopyapp",
 };
@@ -85,7 +85,7 @@ async function refreshStats() {
     const ca = s.token || SITE_CONFIG.tokenCa;
     if (ca) {
       SITE_CONFIG.tokenCa = ca;
-      $("caDisplay").textContent = `$WIRECOPY: ${ca.slice(0, 6)}…${ca.slice(-4)}`;
+      $("caDisplay").textContent = `$WCOPY: ${ca.slice(0, 6)}…${ca.slice(-4)}`;
     }
     if (s.registry) {
       SITE_CONFIG.tapeRegistry = s.registry;
